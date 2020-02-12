@@ -33,13 +33,14 @@ void *playThread(void *object) {
     return NULL;
 }
 
-BaseChannel::BaseChannel(int streamIndex, AVCodecContext *decoderContext) {
+BaseChannel::BaseChannel(int streamIndex, AVCodecContext *decoderContext, AVRational timeBase) {
     mStreamIndex = streamIndex;
     mDecoderContext = decoderContext;
     mPackets = new SafeQueue<AVPacket *>;
     mFrames = new SafeQueue<AVFrame *>;
     mPackets->setReleaseCallback(deletePacket);
     mFrames->setReleaseCallback(deleteFrame);
+    mTimeBase = timeBase;
 }
 
 BaseChannel::~BaseChannel() {

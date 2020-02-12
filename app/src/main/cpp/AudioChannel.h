@@ -18,7 +18,7 @@ class AudioChannel : public BaseChannel {
 public:
     uint8_t *mAudioBuffer = NULL;
 
-    AudioChannel(int streamIndex, AVCodecContext *decoderContext);
+    AudioChannel(int streamIndex, AVCodecContext *decoderContext, AVRational timeBase);
 
     ~AudioChannel();
 

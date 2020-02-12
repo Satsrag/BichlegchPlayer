@@ -26,7 +26,10 @@ public:
     SafeQueue<AVPacket *> *mPackets;
     SafeQueue<AVFrame *> *mFrames;
 
-    BaseChannel(int streamIndex, AVCodecContext *decoderContext);
+    AVRational mTimeBase;
+    int64_t mTimestamp;
+
+    BaseChannel(int streamIndex, AVCodecContext *decoderContext, AVRational timeBase);
 
     virtual ~BaseChannel();
 

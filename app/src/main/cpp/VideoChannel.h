@@ -20,7 +20,7 @@ public:
 
     typedef void (*RenderCallback)(uint8_t *, int, int, int, void *);
 
-    VideoChannel(int streamIndex, AVCodecContext *decoderContext);
+    VideoChannel(int streamIndex, AVCodecContext *decoderContext, AVRational timeBase, int fps);
 
     ~VideoChannel();
 
@@ -34,9 +34,13 @@ public:
 
     void playThread();
 
+    void setStandardTimestampChannel(BaseChannel *standardTimestampChannel);
+
 private:
     RenderCallback mRenderCallback = NULL;
     void *mRenderCallbackObject = NULL;
+    BaseChannel *mStandardTimestampChannel = NULL;
+    int mFps;
 };
 
 

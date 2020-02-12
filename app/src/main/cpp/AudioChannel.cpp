@@ -6,8 +6,8 @@
 
 #include "AudioChannel.h"
 
-AudioChannel::AudioChannel(int streamIndex, AVCodecContext *decoderContext) : BaseChannel(
-        streamIndex, decoderContext) {
+AudioChannel::AudioChannel(int streamIndex, AVCodecContext *decoderContext, AVRational timeBase)
+        : BaseChannel(streamIndex, decoderContext, timeBase) {
     mOutSampleBytes = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
     mOutChannelCount = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
     int audioBufferSize = mOutChannelCount * mOutSampleBytes * mOutSampleRate;
@@ -24,7 +24,6 @@ AudioChannel::~AudioChannel() {
     swr_free(&mSwrContext);
     free(mAudioBuffer);
     mAudioBuffer = NULL;
-    // todo release audio pointer
     if (mBufferQueueInterface) {
         (*mBufferQueueInterface)->Clear(mBufferQueueInterface);
         mBufferQueueInterface = NULL;
@@ -157,6 +156,7 @@ int AudioChannel::getPCM() {
             break;
         }
         pcmSize = ret * mOutSampleBytes * mOutChannelCount;
+        mTimestamp = frame->best_effort_timestamp;
         break;
     }
     av_frame_free(&frame);

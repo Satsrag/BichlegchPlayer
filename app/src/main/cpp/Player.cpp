@@ -106,19 +106,24 @@ void Player::prepare_() {
             }
             return;
         }
+        AVRational timeBase = avStream->time_base;
         switch (decoderParam->codec_type) {
-            case AVMEDIA_TYPE_VIDEO:
+            case AVMEDIA_TYPE_VIDEO: {
                 mVideoDecoderContext = decoderContext;
-                mVideoChannel = new VideoChannel(streamIndex, decoderContext);
+                int fps = static_cast<int>(av_q2d(avStream->avg_frame_rate));
+                mVideoChannel = new VideoChannel(streamIndex, decoderContext, timeBase, fps);
                 mVideoChannel->setRenderCallback(renderCallback, this);
                 break;
-            case AVMEDIA_TYPE_AUDIO:
+            }
+            case AVMEDIA_TYPE_AUDIO: {
                 mAudioDecoderContext = decoderContext;
-                mAudioChannel = new AudioChannel(streamIndex, decoderContext);
+                mAudioChannel = new AudioChannel(streamIndex, decoderContext, timeBase);
                 break;
-            default:
+            }
+            default: {
                 avcodec_free_context(&decoderContext);
                 break;
+            }
         }
     }
     if (!mVideoChannel && !mAudioChannel) {
@@ -126,6 +131,9 @@ void Player::prepare_() {
             mJNICallback->onErrorAction(THREAD_CHILD, FFMPEG_NOMEDIA);
         }
         return;
+    }
+    if (mVideoChannel) {
+        mVideoChannel->setStandardTimestampChannel(mAudioChannel);
     }
     if (mJNICallback != NULL) {
         mJNICallback->onPrepared(THREAD_CHILD);
