@@ -49,8 +49,7 @@ void VideoChannel::playThread() {
             if (deltaTimestampSecond > 1) {
                 av_usleep(static_cast<unsigned int>(frameDelayTime * 2 * 1000000));
             } else {
-                av_usleep(static_cast<unsigned int>((frameDelayTime + deltaTimestampSecond) *
-                                                    1000000));
+                av_usleep(static_cast<unsigned int>(deltaTimestampSecond * 1000000));
             }
         } else if (deltaTimestampSecond < 0) {
             // video is slow that standard

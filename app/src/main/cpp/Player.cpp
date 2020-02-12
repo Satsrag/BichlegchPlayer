@@ -29,6 +29,7 @@ Player::~Player() {
     }
     delete mAudioChannel;
     delete mVideoChannel;
+    LOGE("Player destruct");
 }
 
 void *prepareThread(void *object) {
@@ -185,14 +186,6 @@ void Player::start_() {
         }
     }
     mPlaying = 0;
-    if (mVideoChannel) {
-        mVideoChannel->stop();
-    }
-    if (mAudioChannel) {
-        mAudioChannel->stop();
-    }
-    delete mVideoChannel;
-    delete mAudioChannel;
 }
 
 void Player::setRenderCallback(Player::RenderCallback renderCallback) {

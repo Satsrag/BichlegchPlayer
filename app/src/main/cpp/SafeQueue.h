@@ -7,6 +7,7 @@
 
 #include <queue>
 #include <pthread.h>
+#include "Log.h"
 
 template<typename T>
 class SafeQueue {
@@ -28,6 +29,7 @@ public:
     }
 
     ~SafeQueue() {
+        LOGE("SafeQueue destruct");
         pthread_cond_destroy(&mCond);
         pthread_mutex_destroy(&mMutex);
     }

@@ -44,13 +44,13 @@ BaseChannel::BaseChannel(int streamIndex, AVCodecContext *decoderContext, AVRati
 }
 
 BaseChannel::~BaseChannel() {
-    LOGD("BaseChannel destructor called");
     mPlaying = 0;
     mPackets->clear();
     mFrames->clear();
     delete mPackets;
     delete mFrames;
     mDecoderContext = NULL;
+    LOGE("BaseChannel destruct");
 }
 
 void BaseChannel::start() {
@@ -62,6 +62,7 @@ void BaseChannel::start() {
 }
 
 void BaseChannel::stop() {
+    mPlaying = 0;
     mPackets->setWorking(0);
     pthread_join(mDecodeThread, NULL);
     mFrames->setWorking(0);
