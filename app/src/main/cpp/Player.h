@@ -18,10 +18,15 @@ extern "C" {
 };
 
 class Player {
+
 public:
+    typedef void (*RenderCallback)(uint8_t *, int, int, int, Player *player);
+
     Player(const char *dataSource, JNICallback *jniCallback);
 
     ~Player();
+
+    void release();
 
     void setRenderCallback(RenderCallback renderCallback);
 
@@ -33,6 +38,8 @@ public:
 
     void start_();
 
+    void renderFrame(uint8_t *, int, int, int);
+
 private:
     char *mDataSource = NULL;
     int mPlaying = 0;
@@ -41,13 +48,14 @@ private:
     pthread_t mStartThread;
     AVFormatContext *mAVFormatContext = NULL;
 
-    VideoChannel *mVideoChannel = NULL;
     AudioChannel *mAudioChannel = NULL;
+    VideoChannel *mVideoChannel = NULL;
 
     AVCodecContext *mVideoDecoderContext = NULL;
     AVCodecContext *mAudioDecoderContext = NULL;
 
     RenderCallback mRenderCallback;
+
 };
 
 #endif //BICHLEGCHPLAYER_PLAYER_H

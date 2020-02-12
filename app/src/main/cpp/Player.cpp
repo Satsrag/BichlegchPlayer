@@ -1,9 +1,9 @@
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-use-nullptr"
 //
 // Created by Sachrag Zaanzab Borzood on 2020-01-28.
 //
-
 #include "Player.h"
 #include "Log.h"
 
@@ -14,10 +14,10 @@ Player::Player(const char *dataSource, JNICallback *jniCallback) {
 }
 
 Player::~Player() {
+    mPlaying = 0;
     delete[] mDataSource;
     mJNICallback = NULL;
-    delete mVideoChannel;
-    delete mAudioChannel;
+    mRenderCallback = NULL;
     if (mVideoDecoderContext) {
         avcodec_free_context(&mVideoDecoderContext);
     }
@@ -27,6 +27,8 @@ Player::~Player() {
     if (mAVFormatContext) {
         avformat_close_input(&mAVFormatContext);
     }
+    delete mAudioChannel;
+    delete mVideoChannel;
 }
 
 void *prepareThread(void *object) {
@@ -40,6 +42,12 @@ void *startThread(void *object) {
     player->start_();
     return NULL;
 }
+
+void renderCallback(uint8_t *data, int width, int height, int lineSize, void *object) {
+    auto *pPlayer = static_cast<Player *>(object);
+    pPlayer->renderFrame(data, width, height, lineSize);
+}
+
 
 void Player::prepare() {
     pthread_create(&mPrepareThread, NULL, &prepareThread, this);
@@ -102,7 +110,7 @@ void Player::prepare_() {
             case AVMEDIA_TYPE_VIDEO:
                 mVideoDecoderContext = decoderContext;
                 mVideoChannel = new VideoChannel(streamIndex, decoderContext);
-                mVideoChannel->setRenderCallback(mRenderCallback);
+                mVideoChannel->setRenderCallback(renderCallback, this);
                 break;
             case AVMEDIA_TYPE_AUDIO:
                 mAudioDecoderContext = decoderContext;
@@ -162,6 +170,7 @@ void Player::start_() {
             }
         } else if (AVERROR_EOF == ret) {
             // todo handle end
+            av_packet_free(&packet);
         } else {
             av_packet_free(&packet);
             break;
@@ -174,11 +183,30 @@ void Player::start_() {
     if (mAudioChannel) {
         mAudioChannel->stop();
     }
+    delete mVideoChannel;
+    delete mAudioChannel;
 }
 
-void Player::setRenderCallback(RenderCallback renderCallback) {
+void Player::setRenderCallback(Player::RenderCallback renderCallback) {
     mRenderCallback = renderCallback;
 }
 
+void Player::renderFrame(uint8_t *data, int width, int height, int lineSize) {
+    if (mRenderCallback) {
+        mRenderCallback(data, width, height, lineSize, this);
+    }
+}
+
+void Player::release() {
+    mPlaying = 0;
+    pthread_join(mPrepareThread, NULL);
+    pthread_join(mStartThread, NULL);
+    if (mVideoChannel) {
+        mVideoChannel->stop();
+    }
+    if (mAudioChannel) {
+        mAudioChannel->stop();
+    }
+}
 
 #pragma clang diagnostic pop

@@ -5,6 +5,7 @@
 //
 
 #include "BaseChannel.h"
+#include "Log.h"
 
 void deletePacket(AVPacket **packet) {
     if (packet && *packet) {
@@ -35,17 +36,20 @@ void *playThread(void *object) {
 BaseChannel::BaseChannel(int streamIndex, AVCodecContext *decoderContext) {
     mStreamIndex = streamIndex;
     mDecoderContext = decoderContext;
-    mPackets = new SafeQueue<AVPacket *>();
-    mFrames = new SafeQueue<AVFrame *>();
+    mPackets = new SafeQueue<AVPacket *>;
+    mFrames = new SafeQueue<AVFrame *>;
     mPackets->setReleaseCallback(deletePacket);
     mFrames->setReleaseCallback(deleteFrame);
 }
 
 BaseChannel::~BaseChannel() {
+    LOGD("BaseChannel destructor called");
+    mPlaying = 0;
     mPackets->clear();
     mFrames->clear();
     delete mPackets;
     delete mFrames;
+    mDecoderContext = NULL;
 }
 
 void BaseChannel::start() {
@@ -57,7 +61,10 @@ void BaseChannel::start() {
 }
 
 void BaseChannel::stop() {
-
+    mPackets->setWorking(0);
+    pthread_join(mDecodeThread, NULL);
+    mFrames->setWorking(0);
+    pthread_join(mPlayThread, NULL);
 }
 
 void BaseChannel::decodeThread() {

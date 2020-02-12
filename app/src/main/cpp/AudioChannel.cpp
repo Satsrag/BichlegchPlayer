@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-nullptr"
 //
 // Created by Sachrag Zaanzab Borzood on 2020-01-29.
 //
@@ -23,6 +25,25 @@ AudioChannel::~AudioChannel() {
     free(mAudioBuffer);
     mAudioBuffer = NULL;
     // todo release audio pointer
+    if (mBufferQueueInterface) {
+        (*mBufferQueueInterface)->Clear(mBufferQueueInterface);
+        mBufferQueueInterface = NULL;
+    }
+    mPlayerInterface = NULL;
+    if (mPlayerObject) {
+        (*mPlayerObject)->Destroy(mPlayerObject);
+        mPlayerObject = NULL;
+    }
+    mOutputMixInterface = NULL;
+    if (mOutputMix) {
+        (*mOutputMix)->Destroy(mOutputMix);
+        mOutputMix = NULL;
+    }
+    mEngineInterface = NULL;
+    if (mEngine) {
+        (*mEngine)->Destroy(mEngine);
+        mEngine = NULL;
+    }
 }
 
 void bufferQueueCallback(SLAndroidSimpleBufferQueueItf caller, void *pContext) {
@@ -141,3 +162,5 @@ int AudioChannel::getPCM() {
     av_frame_free(&frame);
     return pcmSize;
 }
+
+#pragma clang diagnostic pop

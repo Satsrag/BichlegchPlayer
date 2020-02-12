@@ -23,8 +23,8 @@ protected:
 
 public:
     int mStreamIndex;
-    SafeQueue<AVPacket *> *mPackets = NULL;
-    SafeQueue<AVFrame *> *mFrames = NULL;
+    SafeQueue<AVPacket *> *mPackets;
+    SafeQueue<AVFrame *> *mFrames;
 
     BaseChannel(int streamIndex, AVCodecContext *decoderContext);
 

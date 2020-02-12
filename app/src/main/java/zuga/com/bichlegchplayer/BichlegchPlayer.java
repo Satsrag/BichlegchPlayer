@@ -45,6 +45,10 @@ public class BichlegchPlayer implements SurfaceHolder.Callback {
         nativeStart();
     }
 
+    public void release() {
+        nativeRelease();
+    }
+
     interface OnPreparedListener {
         void onPrepared();
 
@@ -85,4 +89,5 @@ public class BichlegchPlayer implements SurfaceHolder.Callback {
 
     private native void nativeStart();
 
+    private native void nativeRelease();
 }

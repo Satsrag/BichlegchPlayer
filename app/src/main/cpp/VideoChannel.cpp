@@ -7,9 +7,8 @@
 #include "VideoChannel.h"
 #include "Log.h"
 
-VideoChannel::VideoChannel(int streamIndex, AVCodecContext *decoderContext) : BaseChannel(
-        streamIndex, decoderContext) {
-
+VideoChannel::VideoChannel(int streamIndex, AVCodecContext *decoderContext)
+        : BaseChannel(streamIndex, decoderContext) {
 }
 
 void VideoChannel::playThread() {
@@ -39,7 +38,7 @@ void VideoChannel::playThread() {
                   linesSizes);
         if (mRenderCallback) {
             mRenderCallback(dstFrame[0], mDecoderContext->width, mDecoderContext->height,
-                            linesSizes[0]);
+                            linesSizes[0], mRenderCallbackObject);
         }
         av_frame_free(&frame);
     }
@@ -49,11 +48,13 @@ void VideoChannel::playThread() {
 }
 
 VideoChannel::~VideoChannel() {
-
+    mRenderCallback = NULL;
+    mRenderCallbackObject = NULL;
 }
 
-void VideoChannel::setRenderCallback(RenderCallback renderCallback) {
+void VideoChannel::setRenderCallback(RenderCallback renderCallback, void *object) {
     mRenderCallback = renderCallback;
+    mRenderCallbackObject = object;
 }
 
 #pragma clang diagnostic pop

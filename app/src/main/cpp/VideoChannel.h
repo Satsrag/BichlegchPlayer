@@ -13,14 +13,13 @@ extern "C" {
 #include <libavutil/imgutils.h>
 };
 
-typedef void (*RenderCallback)(uint8_t *, int, int, int);
 
 class VideoChannel : public BaseChannel {
 
-private:
-    RenderCallback mRenderCallback;
-
 public:
+
+    typedef void (*RenderCallback)(uint8_t *, int, int, int, void *);
+
     VideoChannel(int streamIndex, AVCodecContext *decoderContext);
 
     ~VideoChannel();
@@ -31,9 +30,14 @@ public:
      *                       int height
      *                       int lineSize
      */
-    void setRenderCallback(RenderCallback renderCallback);
+    void setRenderCallback(RenderCallback renderCallback, void *object);
 
     void playThread();
+
+private:
+    RenderCallback mRenderCallback = NULL;
+    void *mRenderCallbackObject = NULL;
 };
+
 
 #endif //BICHLEGCHPLAYER_VIDEOCHANNEL_H

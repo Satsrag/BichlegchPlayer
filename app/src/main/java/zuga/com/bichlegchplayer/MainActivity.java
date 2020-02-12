@@ -21,13 +21,17 @@ public class MainActivity extends AppCompatActivity implements BichlegchPlayer.O
         mSurfaceView = findViewById(R.id.surface_view);
 
         mBichlegchPlayer = new BichlegchPlayer();
-        mBichlegchPlayer.setSurfaceView(mSurfaceView);
-        mBichlegchPlayer.setDataSource(mPath);
         mBichlegchPlayer.setOnPreparedListener(this);
+        mBichlegchPlayer.setDataSource(mPath);
+        mBichlegchPlayer.setSurfaceView(mSurfaceView);
+        mBichlegchPlayer.prepare();
     }
 
     @Override
     public void onPrepared() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -48,6 +52,12 @@ public class MainActivity extends AppCompatActivity implements BichlegchPlayer.O
     }
 
     public void prepare(View view) {
-        mBichlegchPlayer.prepare();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBichlegchPlayer.release();
     }
 }
