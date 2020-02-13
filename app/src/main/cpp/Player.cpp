@@ -52,6 +52,7 @@ void renderCallback(uint8_t *data, int width, int height, int lineSize, void *ob
 
 void Player::prepare() {
     pthread_create(&mPrepareThread, NULL, &prepareThread, this);
+    mPreparedThreadCreated = 1;
 }
 
 void Player::prepare_() {
@@ -150,6 +151,7 @@ void Player::start() {
         mVideoChannel->start();
     }
     pthread_create(&mStartThread, NULL, &startThread, this);
+    mStartThreadCreated = 1;
 }
 
 void Player::start_() {
@@ -200,8 +202,12 @@ void Player::renderFrame(uint8_t *data, int width, int height, int lineSize) {
 
 void Player::release() {
     mPlaying = 0;
-    pthread_join(mPrepareThread, NULL);
-    pthread_join(mStartThread, NULL);
+    if (mPreparedThreadCreated) {
+        pthread_join(mPrepareThread, NULL);
+    }
+    if (mStartThreadCreated) {
+        pthread_join(mStartThread, NULL);
+    }
     if (mVideoChannel) {
         mVideoChannel->stop();
     }

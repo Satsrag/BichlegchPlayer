@@ -38,18 +38,19 @@ void putMap(std::map<Key, Value *> **map, Key key, Value *value) {
 }
 
 template<typename Key, typename Value>
-void removeMap(std::map<Key, Value *> *map, Key key,
+void removeMap(std::map<Key, Value *> **map, Key key,
                typename ReleaseCallbackWrapper<Value>::ReleaseCallback releaseCallback) {
-    if (map == NULL) {
+    if (*map == NULL) {
         return;
     }
-    Value *value = (*map)[key];
+    Value *value = (**map)[key];
     if (value) {
-        map->erase(key);
+        (*map)->erase(key);
     }
     releaseCallback(&value);
-    if (map->empty()) {
-        delete map;
+    if ((*map)->empty()) {
+        delete *map;
+        *map = NULL;
     }
 }
 
@@ -101,7 +102,7 @@ void renderCallback(uint8_t *frameData, int width, int height, int lineSize, Pla
     //todo inOutDirtyBounds what it is
     int32_t ret = ANativeWindow_lock(pNativeWindow, &buffer, NULL);
     if (ret) {
-        removeMap<Player *, ANativeWindow>(mNativeWindowMap, player, releaseNativeWindow);
+        removeMap<Player *, ANativeWindow>(&mNativeWindowMap, player, releaseNativeWindow);
         pthread_mutex_unlock(pMutex);
         return;
     }
@@ -166,7 +167,7 @@ Java_zuga_com_bichlegchplayer_BichlegchPlayer_nativeSetSurface(JNIEnv *env, jobj
 
     ANativeWindow *pNativeWindow = getMap(mNativeWindowMap, pPlayer);
     if (pNativeWindow) {
-        removeMap<Player *, ANativeWindow>(mNativeWindowMap, pPlayer, &releaseNativeWindow);
+        removeMap<Player *, ANativeWindow>(&mNativeWindowMap, pPlayer, &releaseNativeWindow);
     }
     pNativeWindow = ANativeWindow_fromSurface(env, surface);
     putMap(&mNativeWindowMap, pPlayer, pNativeWindow);
@@ -181,9 +182,9 @@ Java_zuga_com_bichlegchplayer_BichlegchPlayer_nativeRelease(JNIEnv *env, jobject
     if (pPlayer) {
         pPlayer->release();
         int thizHashCode = getHashCode(env, thiz);
-        removeMap(mMutexMap, pPlayer, &release);
-        removeMap(mNativeWindowMap, pPlayer, &releaseNativeWindow);
-        removeMap(mJniCallback, thizHashCode, release);
-        removeMap(mPlayerMap, thizHashCode, release);
+        removeMap(&mMutexMap, pPlayer, &release);
+        removeMap(&mNativeWindowMap, pPlayer, &releaseNativeWindow);
+        removeMap(&mJniCallback, thizHashCode, release);
+        removeMap(&mPlayerMap, thizHashCode, release);
     }
 }

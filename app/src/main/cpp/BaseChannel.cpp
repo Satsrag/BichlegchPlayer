@@ -59,14 +59,17 @@ void BaseChannel::start() {
     mFrames->setWorking(1);
     pthread_create(&mDecodeThread, NULL, ::decodeThread, this);
     pthread_create(&mPlayThread, NULL, ::playThread, this);
+    mDecodePlayThreadCreated = 1;
 }
 
 void BaseChannel::stop() {
     mPlaying = 0;
     mPackets->setWorking(0);
-    pthread_join(mDecodeThread, NULL);
     mFrames->setWorking(0);
-    pthread_join(mPlayThread, NULL);
+    if (mDecodePlayThreadCreated) {
+        pthread_join(mDecodeThread, NULL);
+        pthread_join(mPlayThread, NULL);
+    }
 }
 
 void BaseChannel::decodeThread() {

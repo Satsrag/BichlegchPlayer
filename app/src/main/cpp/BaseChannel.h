@@ -16,6 +16,7 @@ class BaseChannel {
 private:
     pthread_t mDecodeThread;
     pthread_t mPlayThread;
+    volatile int mDecodePlayThreadCreated = 0;
 
 protected:
     int mPlaying = 0;

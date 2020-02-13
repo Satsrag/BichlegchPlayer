@@ -46,6 +46,8 @@ private:
     JNICallback *mJNICallback = NULL;
     pthread_t mPrepareThread;
     pthread_t mStartThread;
+    volatile int mPreparedThreadCreated = 0;
+    volatile int mStartThreadCreated = 0;
     AVFormatContext *mAVFormatContext = NULL;
 
     AudioChannel *mAudioChannel = NULL;
